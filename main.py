@@ -5,12 +5,22 @@ import io
 import base64
 from ultralytics import YOLO
 import cv2
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # import torchvision.transforms as transforms
+# uvicorn main:app --reload
 
 app = FastAPI() 
 model = None
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # В продакшене замените на конкретные домены
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Загрузка вашей модели 
 def load_model():
     """Загрузка YOLO модели"""

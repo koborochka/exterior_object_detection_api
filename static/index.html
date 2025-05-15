@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>YOLO Image Processor</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 20px;
+				text-align: center;
+			}
+			.upload-container {
+				border: 2px dashed #ccc;
+				padding: 20px;
+				margin: 20px 0;
+				border-radius: 5px;
+			}
+			#imagePreview,
+			#processedImage {
+				max-width: 100%;
+				margin-top: 20px;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+			}
+			button {
+				background-color: #4caf50;
+				color: white;
+				padding: 10px 15px;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+				margin: 10px 0;
+			}
+			button:hover {
+				background-color: #45a049;
+			}
+			.download-apk {
+				margin-top: 40px;
+				padding: 10px;
+				background-color: #f8f8f8;
+				border-top: 1px solid #eee;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Обработка изображений с YOLO</h1>
+
+		<div class="upload-container">
+			<input type="file" id="imageInput" accept="image/*" />
+			<button onclick="processImage()">Обработать изображение</button>
+
+			<div>
+				<h3>Исходное изображение:</h3>
+				<img id="imagePreview" style="display: none" />
+			</div>
+
+			<div>
+				<h3>Результат:</h3>
+				<img id="processedImage" style="display: none" />
+			</div>
+		</div>
+
+		<div class="download-apk">
+			<h3>Скачать мобильное приложение</h3>
+			<a href="your_app.apk" download>
+				<button>Скачать APK</button>
+			</a>
+			<p>Версия 1.0</p>
+		</div>
+
+		<script>
+			// Показ загруженного изображения
+			document
+				.getElementById("imageInput")
+				.addEventListener("change", function (e) {
+					const file = e.target.files[0];
+					if (file) {
+						const reader = new FileReader();
+						reader.onload = function (event) {
+							const img = document.getElementById("imagePreview");
+							img.src = event.target.result;
+							img.style.display = "block";
+						};
+						reader.readAsDataURL(file);
+					}
+				});
+
+			// Отправка изображения на сервер
+			async function processImage() {
+				const fileInput = document.getElementById("imageInput");
+				const file = fileInput.files[0];
+
+				if (!file) {
+					alert("Пожалуйста, выберите изображение!");
+					return;
+				}
+
+				try {
+					const formData = new FormData();
+					formData.append("file", file);
+
+					const response = await fetch(
+						"http://localhost:8000/image-to-image/",
+						{
+							method: "POST",
+							body: formData,
+						}
+					);
+
+					if (!response.ok) {
+						throw new Error("Ошибка обработки изображения");
+					}
+
+					// Получение обработанного изображения
+					const blob = await response.blob();
+					const processedImg =
+						document.getElementById("processedImage");
+					processedImg.src = URL.createObjectURL(blob);
+					processedImg.style.display = "block";
+				} catch (error) {
+					console.error("Error:", error);
+					alert("Произошла ошибка: " + error.message);
+				}
+			}
+		</script>
+	</body>
+</html>
